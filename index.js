@@ -1,22 +1,8 @@
-const express = require('express');
-const path = require('path')
+require("dotenv").config();
+const app = require("./app");
 
-const app = express();
+const PORT = process.env.PORT || 5000;
 
-const port = parseInt(process.env.PORT) || process.argv[3] || 8080;
-
-app.use(express.static(path.join(__dirname, 'public')))
-  .set('views', path.join(__dirname, 'views'))
-  .set('view engine', 'ejs');
-
-app.get('/', (req, res) => {
-  res.render('index');
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || "development"} mode`);
 });
-
-app.get('/api', (req, res) => {
-  res.json({"msg": "Hello world"});
-});
-
-app.listen(port, () => {
-  console.log(`Listening on http://localhost:${port}`);
-})
