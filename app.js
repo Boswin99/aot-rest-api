@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
+const programRoutes = require("./routes/program.routes");
+const tourRoutes = require("./routes/tour.routes");
 const notFoundHandler = require("./middleware/notFoundHandler");
 const errorHandler = require("./middleware/errorHandler");
 
@@ -18,6 +20,12 @@ app.get("/api/health", (_req, res) => {
 
 // Auth routes
 app.use("/api/v1/auth", authRoutes);
+
+// Program routes
+app.use("/api/v1/programs", programRoutes);
+
+// Tour routes
+app.use("/api/v1/tours", tourRoutes);
 
 // Error handling
 app.use(notFoundHandler);
