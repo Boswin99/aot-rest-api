@@ -1,4 +1,4 @@
-const { loginUser } = require("../services/auth.service");
+const { loginUser, refreshUserToken } = require("../services/auth.service");
 const admin = require("../config/firebase");
 
 const login = async (req, res, next) => {
@@ -44,4 +44,22 @@ const me = async (req, res, next) => {
   }
 };
 
-module.exports = { login, me };
+const refreshToken = async (req, res, next) => {
+  const { refreshToken } = req.body;
+
+  try {
+    const result = await refreshUserToken(refreshToken);
+    res.status(200).json({
+      message: "Token refreshed successfully",
+      idToken: result.idToken,
+      refreshToken: result.refreshToken,
+      expiresIn: result.expiresIn,
+      userId: result.userId,
+    });
+  } catch (error) {
+    error.statusCode = 401;
+    next(error);
+  }
+};
+
+module.exports = { login, me, refreshToken };
