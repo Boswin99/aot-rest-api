@@ -14,12 +14,8 @@ const createNewProgram = async (req, res, next) => {
 };
 
 const getAllPrograms = async (req, res, next) => {
-  if (!req.user?.id) {
-    res.status(401).json({ message: "Not authenticated" });
-    return;
-  }
   try {
-    const programs = await programService.getProgramsByUser(req.user.id);
+    const programs = await programService.getAllProgramsPublic();
     res.status(200).json(programs);
   } catch (error) {
     next(error);
@@ -44,14 +40,10 @@ const updateExistingProgram = async (req, res, next) => {
 };
 
 const getProgramById = async (req, res, next) => {
-  if (!req.user?.id) {
-    res.status(401).json({ message: "Not authenticated" });
-    return;
-  }
   try {
-    const program = await programService.getProgramById(req.user.id, req.params);
+    const program = await programService.getProgramByIdPublic(req.params);
     if (!program) {
-      res.status(404).json({ message: "Program not found or access denied" });
+      res.status(404).json({ message: "Program not found" });
       return;
     }
     res.status(200).json(program);

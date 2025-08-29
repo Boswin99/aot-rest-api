@@ -27,6 +27,17 @@ const getProgramsByUser = async (userId) => {
   return programs;
 };
 
+const getAllProgramsPublic = async () => {
+  const snapshot = await db.collection("programs").get();
+  const programs = [];
+
+  snapshot.forEach((doc) => {
+    programs.push({ id: doc.id, ...doc.data() });
+  });
+
+  return programs;
+};
+
 const getProgramById = async (userId, params) => {
   const { id: programId } = params;
 
@@ -35,6 +46,23 @@ const getProgramById = async (userId, params) => {
     const doc = await docRef.get();
 
     if (!doc.exists || doc.data().userId !== userId) {
+      return null;
+    }
+
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getProgramByIdPublic = async (params) => {
+  const { id: programId } = params;
+
+  try {
+    const docRef = db.collection("programs").doc(programId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
       return null;
     }
 
@@ -91,7 +119,9 @@ const deleteProgramById = async (userId, params) => {
 module.exports = {
   createProgram,
   getProgramsByUser,
+  getAllProgramsPublic,
   getProgramById,
+  getProgramByIdPublic,
   updateProgramById,
   deleteProgramById,
 };

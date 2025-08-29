@@ -27,6 +27,17 @@ const getToursByUser = async (userId) => {
   return tours;
 };
 
+const getAllToursPublic = async () => {
+  const snapshot = await db.collection("tours").get();
+  const tours = [];
+
+  snapshot.forEach((doc) => {
+    tours.push({ id: doc.id, ...doc.data() });
+  });
+
+  return tours;
+};
+
 const getTourById = async (userId, params) => {
   const { id: tourId } = params;
 
@@ -35,6 +46,23 @@ const getTourById = async (userId, params) => {
     const doc = await docRef.get();
 
     if (!doc.exists || doc.data().userId !== userId) {
+      return null;
+    }
+
+    return { id: doc.id, ...doc.data() };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getTourByIdPublic = async (params) => {
+  const { id: tourId } = params;
+
+  try {
+    const docRef = db.collection("tours").doc(tourId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
       return null;
     }
 
@@ -91,7 +119,9 @@ const deleteTourById = async (userId, params) => {
 module.exports = {
   createTour,
   getToursByUser,
+  getAllToursPublic,
   getTourById,
+  getTourByIdPublic,
   updateTourById,
   deleteTourById,
 };

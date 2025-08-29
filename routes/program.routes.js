@@ -6,12 +6,10 @@ const { createNewProgram, getAllPrograms, getProgramById, updateExistingProgram,
 
 const router = express.Router();
 
-router.use(authenticateFirebaseToken);
-
-router.post("/", validate(createProgramSchema), createNewProgram);
+router.post("/", authenticateFirebaseToken, validate(createProgramSchema), createNewProgram);
 router.get("/", getAllPrograms);
 router.get("/:id", validate(programIdParamSchema), getProgramById);
-router.put("/:id", validate(updateProgramSchema), updateExistingProgram);
-router.delete("/:id", validate(programIdParamSchema), deleteExistingProgram);
+router.put("/:id", authenticateFirebaseToken, validate(updateProgramSchema), updateExistingProgram);
+router.delete("/:id", authenticateFirebaseToken, validate(programIdParamSchema), deleteExistingProgram);
 
 module.exports = router;

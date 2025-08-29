@@ -6,12 +6,10 @@ const { createNewTour, getAllTours, getTourById, updateExistingTour, deleteExist
 
 const router = express.Router();
 
-router.use(authenticateFirebaseToken);
-
-router.post("/", validate(createTourSchema), createNewTour);
+router.post("/", authenticateFirebaseToken, validate(createTourSchema), createNewTour);
 router.get("/", getAllTours);
 router.get("/:id", validate(tourIdParamSchema), getTourById);
-router.put("/:id", validate(updateTourSchema), updateExistingTour);
-router.delete("/:id", validate(tourIdParamSchema), deleteExistingTour);
+router.put("/:id", authenticateFirebaseToken, validate(updateTourSchema), updateExistingTour);
+router.delete("/:id", authenticateFirebaseToken, validate(tourIdParamSchema), deleteExistingTour);
 
 module.exports = router;

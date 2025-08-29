@@ -14,12 +14,8 @@ const createNewTour = async (req, res, next) => {
 };
 
 const getAllTours = async (req, res, next) => {
-  if (!req.user?.id) {
-    res.status(401).json({ message: "Not authenticated" });
-    return;
-  }
   try {
-    const tours = await tourService.getToursByUser(req.user.id);
+    const tours = await tourService.getAllToursPublic();
     res.status(200).json(tours);
   } catch (error) {
     next(error);
@@ -27,14 +23,10 @@ const getAllTours = async (req, res, next) => {
 };
 
 const getTourById = async (req, res, next) => {
-  if (!req.user?.id) {
-    res.status(401).json({ message: "Not authenticated" });
-    return;
-  }
   try {
-    const tour = await tourService.getTourById(req.user.id, req.params);
+    const tour = await tourService.getTourByIdPublic(req.params);
     if (!tour) {
-      res.status(404).json({ message: "Tour not found or access denied" });
+      res.status(404).json({ message: "Tour not found" });
       return;
     }
     res.status(200).json(tour);
