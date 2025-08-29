@@ -1,66 +1,70 @@
 const { z } = require("zod");
 
-const tourSchema = z
-  .object({
-    // Basic Information
-    tourTitle: z.string().min(1, "Tour title is required").max(200, "Tour title is too long"),
+const tourSchema = z.object({
+  // Basic Information
+  title: z.string().min(1, "Title is required").max(200, "Title is too long"),
 
-    location: z.string().min(1, "Location is required").max(200, "Location is too long"),
+  duration: z.string().min(1, "Duration is required"),
 
-    duration: z
-      .string()
-      .min(1, "Duration is required")
-      .regex(/^[0-9]+\s*(days?|nights?)$/i, "Duration must be like '7 days'"),
+  groupSize: z.string().min(1, "Group size is required"),
 
-    price: z.coerce.number().min(0, "Price must be a positive number").max(1000000, "Price is too high"),
+  price: z.coerce.number().min(0, "Price must be a positive number").max(10000000, "Price is too high"),
 
-    status: z.enum(["Active", "Draft", "Inactive"], {
+  premiumPrice: z.coerce.number().min(0, "Premium price must be a positive number").max(10000000, "Premium price is too high").optional(),
+
+  currency: z.string().min(1, "Currency is required").max(10, "Currency code too long"),
+
+  category: z.string().min(1, "Category is required").max(100, "Category name too long"),
+
+  description: z.string().min(1, "Description is required"),
+
+  image: z.any().optional(),
+
+  status: z
+    .enum(["Active", "Draft", "Inactive"], {
       errorMap: () => ({ message: "Invalid status" }),
-    }),
+    })
+    .optional(),
 
-    difficultyLevel: z.enum(["Easy", "Moderate", "Challenging"], {
-      errorMap: () => ({ message: "Invalid difficulty level" }),
-    }),
+  difficulty: z.enum(["Easy", "Moderate", "Challenging", "Easy to Moderate"], {
+    errorMap: () => ({ message: "Invalid difficulty level" }),
+  }),
 
-    maxParticipants: z.coerce.number().int("Must be an integer").min(1, "At least 1 participant required"),
+  highlights: z.array(z.string().min(1)).min(1, "At least one highlight is required"),
 
-    minParticipants: z.coerce.number().int("Must be an integer").min(1, "At least 1 participant required"),
+  inclusions: z.array(z.string().min(1)).min(1, "At least one included item is required"),
 
-    nextDeparture: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, "Date must be in mm/dd/yyyy format"),
+  exclusions: z.array(z.string().min(1)).optional(),
 
-    tourGuide: z.string().min(1, "Tour guide is required").max(100, "Tour guide name too long"),
+  // Itinerary
+  itinerary: z
+    .array(
+      z.object({
+        day: z.coerce.number().int().min(1, "Day number must be at least 1"),
+        title: z.string().min(1, "Day title is required"),
+        activities: z.array(z.string().min(1)).min(1, "At least one activity is required"),
+        accommodation: z.string().min(1, "Accommodation is required"),
+        meals: z.string().min(1, "Meals information is required"),
+      })
+    )
+    .min(1, "At least one itinerary day is required"),
 
-    meetingPoint: z.string().optional(),
+  packageOptions: z
+    .array(
+      z.object({
+        type: z.string().min(1, "Package type is required"),
+        price: z.coerce.number().min(0, "Package option price must be positive"),
+        features: z.array(z.string().min(1)).min(1, "At least one feature is required"),
+      })
+    )
+    .optional(),
 
-    description: z.string().min(1, "Description is required"),
+  bestTimeToVisit: z.string().optional(),
 
-    // What's Included / Excluded
-    whatsIncluded: z.array(z.string().min(1)).min(1, "At least one included item is required"),
+  notes: z.array(z.string().min(1)).optional(),
 
-    whatsExcluded: z.array(z.string().min(1)).optional(),
-
-    // Itinerary
-    itinerary: z
-      .array(
-        z.object({
-          day: z.coerce.number().int().min(1, "Day number must be at least 1"),
-          title: z.string().min(1, "Day title is required"),
-          description: z.string().min(1, "Day description is required"),
-        })
-      )
-      .min(1, "At least one itinerary day is required"),
-
-    // Additional Information
-    whatToBring: z.string().optional(),
-    cancellationPolicy: z.string().optional(),
-
-    // Tour Image (URL for now, can be adapted for file upload)
-    tourImage: z.string().url("Tour image must be a valid URL").optional(),
-  })
-  .refine((data) => data.maxParticipants >= data.minParticipants, {
-    message: "Max participants must be greater than or equal to min participants",
-    path: ["maxParticipants"],
-  });
+  bookingRequirements: z.array(z.string().min(1)).optional(),
+});
 
 const createTourSchema = z.object({
   body: tourSchema,
