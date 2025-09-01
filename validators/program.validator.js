@@ -1,150 +1,86 @@
 const { z } = require("zod");
 
-// Schema for form data where numbers come as strings
-const programFormDataSchema = z
-  .object({
-    programTitle: z.string().min(1, "Program title is required").max(200, "Program title is too long"),
+// Sub-schemas for complex nested objects
+const curriculumStructureSchema = z.object({
+  year: z.string().min(1, "Year is required"),
+  semester: z.string().min(1, "Semester is required"),
+  highlights: z.string().min(1, "Highlights are required"),
+  credits: z.string().min(1, "Credits are required"),
+});
 
-    category: z.enum(["Diploma", "Certificate", "International", "Short Course"], {
-      errorMap: () => ({ message: "Invalid category" }),
-    }),
+const assessmentSchema = z.object({
+  component: z.string().min(1, "Assessment component is required"),
+  weight: z.string().regex(/^\d+%$/, "Weight must be in percentage format (e.g., '25%')"),
+  notes: z.string().min(1, "Assessment notes are required"),
+});
 
-    status: z.enum(["Active", "Draft", "Inactive"], {
-      errorMap: () => ({ message: "Invalid status" }),
-    }),
+const jobOpportunitySchema = z.object({
+  title: z.string().min(1, "Job title is required"),
+  description: z.string().min(1, "Job description is required"),
+  salary: z.string().min(1, "Salary range is required"),
+});
 
-    duration: z
+// Main program schema matching the new JSON structure
+const programFormDataSchema = z.object({
+  title: z.string().min(1, "Program title is required").max(500, "Program title is too long"),
+
+  duration: z.string().min(1, "Duration is required"),
+
+  credits: z.string().min(1, "Credits are required"),
+
+  intake: z.string().min(1, "Intake information is required"),
+
+  category: z.enum(["undergraduate", "postgraduate", "diploma", "certificate", "short-course", "international"], {
+    errorMap: () => ({ message: "Invalid category" }),
+  }),
+
+  tuitionFee: z.union([
+    z.number().min(0, "Tuition fee must be positive"),
+    z
       .string()
-      .min(1, "Duration is required")
-      .regex(/^[0-9]+\s*(years?|months?)?(,\s*[0-9]+\s*(months?|years?))?$/i, "Duration must be in format like '4 years, 6 months'"),
-
-    // Price comes as string from form data, so we transform it to number
-    price: z
-      .string()
-      .min(1, "Price is required")
       .transform((val) => {
         const num = parseFloat(val);
-        if (isNaN(num)) throw new Error("Price must be a valid number");
+        if (isNaN(num)) throw new Error("Tuition fee must be a valid number");
         return num;
       })
-      .refine((val) => val >= 0, "Price must be a positive number")
-      .refine((val) => val <= 1000000, "Price is too high"),
+      .refine((val) => val >= 0, "Tuition fee must be positive"),
+  ]),
 
-    // Max students comes as string from form data, so we transform it to number
-    maxStudents: z
-      .string()
-      .min(1, "Max students is required")
-      .transform((val) => {
-        const num = parseInt(val, 10);
-        if (isNaN(num)) throw new Error("Max students must be a valid number");
-        return num;
-      })
-      .refine((val) => Number.isInteger(val), "Must be an integer")
-      .refine((val) => val >= 1, "At least 1 student required")
-      .refine((val) => val <= 1000, "Too many students"),
+  currency: z.string().min(1, "Currency is required").max(10, "Currency code too long"),
 
-    leadInstructor: z.string().min(1, "Lead instructor is required").max(100, "Instructor name too long"),
+  deliveryMode: z.enum(["On-Campus", "Online", "Hybrid", "Distance Learning"], {
+    errorMap: () => ({ message: "Invalid delivery mode" }),
+  }),
 
-    startDate: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, "Start date must be in mm/dd/yyyy format"),
+  fullDescription: z.string().min(1, "Full description is required"),
 
-    endDate: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, "End date must be in mm/dd/yyyy format"),
+  coreThemes: z.array(z.string().min(1, "Core theme cannot be empty")).min(1, "At least one core theme is required"),
 
-    description: z.string().min(1, "Description is required"),
+  additionalInfo: z.string().optional(),
 
-    prerequisites: z.string().optional(),
+  curriculumStructure: z.array(curriculumStructureSchema).min(1, "At least one curriculum structure item is required"),
 
-    curriculumOverview: z.string().optional(),
+  teachingMethods: z.array(z.string().min(1, "Teaching method cannot be empty")).min(1, "At least one teaching method is required"),
 
-    // programImage will be handled as a file upload, not a URL
-    // The file validation will be done by multer middleware
-  })
-  .refine(
-    (data) => {
-      // Validate that endDate is after startDate
-      const [sm, sd, sy] = data.startDate.split("/").map(Number);
-      const [em, ed, ey] = data.endDate.split("/").map(Number);
+  assessment: z.array(assessmentSchema).min(1, "At least one assessment method is required"),
 
-      const start = new Date(sy, sm - 1, sd);
-      const end = new Date(ey, em - 1, ed);
-
-      return end > start;
-    },
-    {
-      message: "End date must be after start date",
-      path: ["endDate"],
-    }
-  );
-
-// Original schema for JSON data (keeping for backward compatibility)
-const programSchema = z
-  .object({
-    programTitle: z.string().min(1, "Program title is required").max(200, "Program title is too long"),
-
-    category: z.enum(["Diploma", "Certificate", "International", "Short Course"], {
-      errorMap: () => ({ message: "Invalid category" }),
-    }),
-
-    status: z.enum(["Active", "Draft", "Inactive"], {
+  status: z
+    .enum(["Active", "Draft", "Inactive"], {
       errorMap: () => ({ message: "Invalid status" }),
-    }),
+    })
+    .optional(),
 
-    duration: z
-      .string()
-      .min(1, "Duration is required")
-      .regex(/^[0-9]+\s*(years?|months?)?(,\s*[0-9]+\s*(months?|years?))?$/i, "Duration must be in format like '4 years, 6 months'"),
+  highlights: z.array(z.string().min(1, "Highlight cannot be empty")).min(1, "At least one highlight is required"),
 
-    price: z.number().min(0, "Price must be a positive number").max(1000000, "Price is too high"),
-
-    maxStudents: z.number().int("Must be an integer").min(1, "At least 1 student required").max(1000, "Too many students"),
-
-    leadInstructor: z.string().min(1, "Lead instructor is required").max(100, "Instructor name too long"),
-
-    startDate: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, "Start date must be in mm/dd/yyyy format"),
-
-    endDate: z.string().regex(/^\d{2}\/\d{2}\/\d{4}$/, "End date must be in mm/dd/yyyy format"),
-
-    description: z.string().min(1, "Description is required"),
-
-    prerequisites: z.string().optional(),
-
-    curriculumOverview: z.string().optional(),
-
-    programImage: z.string().url("Program image must be a valid URL").optional(),
-  })
-  .refine(
-    (data) => {
-      // Validate that endDate is after startDate
-      const [sm, sd, sy] = data.startDate.split("/").map(Number);
-      const [em, ed, ey] = data.endDate.split("/").map(Number);
-
-      const start = new Date(sy, sm - 1, sd);
-      const end = new Date(ey, em - 1, ed);
-
-      return end > start;
-    },
-    {
-      message: "End date must be after start date",
-      path: ["endDate"],
-    }
-  );
+  jobOpportunities: z.array(jobOpportunitySchema).min(1, "At least one job opportunity is required"),
+});
 
 const createProgramFormDataSchema = z.object({
   body: programFormDataSchema,
 });
 
-const createProgramSchema = z.object({
-  body: programSchema,
-});
-
 const updateProgramFormDataSchema = z.object({
   body: programFormDataSchema.partial(),
-  params: z.object({
-    id: z.string().min(1, "Program ID is required"),
-  }),
-});
-
-const updateProgramSchema = z.object({
-  body: programSchema.partial(),
   params: z.object({
     id: z.string().min(1, "Program ID is required"),
   }),
@@ -157,8 +93,11 @@ const programIdParamSchema = z.object({
 });
 
 module.exports = {
-  programSchema,
-  createProgramSchema,
-  updateProgramSchema,
+  createProgramFormDataSchema,
+  updateProgramFormDataSchema,
   programIdParamSchema,
+  programFormDataSchema,
+  curriculumStructureSchema,
+  assessmentSchema,
+  jobOpportunitySchema,
 };
