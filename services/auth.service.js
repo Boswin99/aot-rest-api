@@ -2,7 +2,7 @@ const axios = require("axios");
 
 const loginUser = async (email, password) => {
   try {
-    const apiKey = process.env.FIREBASE_API_KEY; // from Firebase project settings
+    const apiKey = process.env.APP_FIREBASE_API_KEY; // from Firebase project settings
     const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
 
     const response = await axios.post(url, {
@@ -26,7 +26,7 @@ const loginUser = async (email, password) => {
 
 const refreshUserToken = async (refreshToken) => {
   try {
-    const apiKey = process.env.FIREBASE_API_KEY;
+    const apiKey = process.env.APP_FIREBASE_API_KEY;
     const url = `https://securetoken.googleapis.com/v1/token?key=${apiKey}`;
 
     const response = await axios.post(url, {

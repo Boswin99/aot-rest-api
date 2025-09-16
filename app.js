@@ -6,7 +6,7 @@ const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
 const programRoutes = require("./routes/program.routes");
 const tourRoutes = require("./routes/tour.routes");
-const apgRoutes = require("./routes/apg.routes");
+const ipgRoutes = require("./routes/ipg.routes");
 
 const notFoundHandler = require("./middleware/notFoundHandler");
 const errorHandler = require("./middleware/errorHandler");
@@ -37,7 +37,7 @@ app.use("/api/v1/programs", programRoutes);
 app.use("/api/v1/tours", tourRoutes);
 
 // APG routes
-app.use("/api/apg", apgRoutes);
+app.use("/api/ipg", ipgRoutes);
 
 // Error handling
 app.use(notFoundHandler);
