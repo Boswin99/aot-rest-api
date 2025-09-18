@@ -26,9 +26,9 @@ const programFormDataSchema = z.object({
 
   duration: z.string().min(1, "Duration is required"),
 
-  credits: z.string().min(1, "Credits are required"),
+  credits: z.string().optional(),
 
-  intake: z.string().min(1, "Intake information is required"),
+  intake: z.string().optional(),
 
   category: z.enum(["undergraduate", "postgraduate", "diploma", "certificate", "short-course", "international"], {
     errorMap: () => ({ message: "Invalid category" }),
@@ -54,15 +54,15 @@ const programFormDataSchema = z.object({
 
   fullDescription: z.string().min(1, "Full description is required"),
 
-  coreThemes: z.array(z.string().min(1, "Core theme cannot be empty")).min(1, "At least one core theme is required"),
+  coreThemes: z.array(z.string().min(1, "Core theme cannot be empty")).optional(),
 
   additionalInfo: z.string().optional(),
 
-  curriculumStructure: z.array(curriculumStructureSchema).min(1, "At least one curriculum structure item is required"),
+  curriculumStructure: z.array(curriculumStructureSchema).optional(),
 
-  teachingMethods: z.array(z.string().min(1, "Teaching method cannot be empty")).min(1, "At least one teaching method is required"),
+  teachingMethods: z.array(z.string().min(1, "Teaching method cannot be empty")).optional(),
 
-  assessment: z.array(assessmentSchema).min(1, "At least one assessment method is required"),
+  assessment: z.array(assessmentSchema).optional(),
 
   status: z
     .enum(["Active", "Draft", "Inactive"], {
@@ -70,9 +70,9 @@ const programFormDataSchema = z.object({
     })
     .optional(),
 
-  highlights: z.array(z.string().min(1, "Highlight cannot be empty")).min(1, "At least one highlight is required"),
+  highlights: z.array(z.string().min(1, "Highlight cannot be empty")).optional(),
 
-  jobOpportunities: z.array(jobOpportunitySchema).min(1, "At least one job opportunity is required"),
+  jobOpportunities: z.array(jobOpportunitySchema).optional(),
 });
 
 const createProgramFormDataSchema = z.object({

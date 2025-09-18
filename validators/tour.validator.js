@@ -2,21 +2,25 @@ const { z } = require("zod");
 
 const tourSchema = z.object({
   // Basic Information
-  title: z.string().min(1, "Title is required").max(200, "Title is too long"),
+  title: z.string().max(200, "Title is too long"),
 
-  duration: z.string().min(1, "Duration is required"),
+  duration: z.string().optional(),
 
-  groupSize: z.string().min(1, "Group size is required"),
+  groupSize: z.string().optional(),
 
-  price: z.coerce.number().min(0, "Price must be a positive number").max(10000000, "Price is too high"),
+  price: z.coerce.number().min(0, "Price must be a positive number").max(10000000, "Price is too high").optional(),
 
-  premiumPrice: z.coerce.number().min(0, "Premium price must be a positive number").max(10000000, "Premium price is too high").optional(),
+  premiumPrice: z.coerce
+    .number()
+    .min(0, "Premium price must be a positive number")
+    .max(10000000, "Premium price is too high")
+    ,
 
-  currency: z.string().min(1, "Currency is required").max(10, "Currency code too long"),
+  currency: z.string().max(10, "Currency code too long").optional(),
 
-  category: z.string().min(1, "Category is required").max(100, "Category name too long"),
+  category: z.string().max(100, "Category name too long").optional(),
 
-  description: z.string().min(1, "Description is required"),
+  description: z.string(),
 
   image: z.any().optional(),
 
@@ -26,44 +30,46 @@ const tourSchema = z.object({
     })
     .optional(),
 
-  difficulty: z.enum(["Easy", "Moderate", "Challenging", "Easy to Moderate"], {
-    errorMap: () => ({ message: "Invalid difficulty level" }),
-  }),
+  difficulty: z
+    .enum(["Easy", "Moderate", "Challenging", "Easy to Moderate"], {
+      errorMap: () => ({ message: "Invalid difficulty level" }),
+    })
+    .optional(),
 
-  highlights: z.array(z.string().min(1)).min(1, "At least one highlight is required"),
+  highlights: z.array(z.string()).optional(),
 
-  inclusions: z.array(z.string().min(1)).min(1, "At least one included item is required"),
+  inclusions: z.array(z.string()).optional(),
 
-  exclusions: z.array(z.string().min(1)).optional(),
+  exclusions: z.array(z.string()).optional(),
 
   // Itinerary
   itinerary: z
     .array(
       z.object({
-        day: z.coerce.number().int().min(1, "Day number must be at least 1"),
-        title: z.string().min(1, "Day title is required"),
-        activities: z.array(z.string().min(1)).min(1, "At least one activity is required"),
-        accommodation: z.string().min(1, "Accommodation is required"),
-        meals: z.string().min(1, "Meals information is required"),
+        day: z.coerce.number().int().min(1, "Day number must be at least 1").optional(),
+        title: z.string().optional(),
+        activities: z.array(z.string()).optional(),
+        accommodation: z.string().optional(),
+        meals: z.string().optional(),
       })
     )
-    .min(1, "At least one itinerary day is required"),
+    .optional(),
 
   packageOptions: z
     .array(
       z.object({
-        type: z.string().min(1, "Package type is required"),
-        price: z.coerce.number().min(0, "Package option price must be positive"),
-        features: z.array(z.string().min(1)).min(1, "At least one feature is required"),
+        type: z.string().optional(),
+        price: z.coerce.number().min(0, "Package option price must be positive").optional(),
+        features: z.array(z.string()).optional(),
       })
     )
     .optional(),
 
   bestTimeToVisit: z.string().optional(),
 
-  notes: z.array(z.string().min(1)).optional(),
+  notes: z.array(z.string()).optional(),
 
-  bookingRequirements: z.array(z.string().min(1)).optional(),
+  bookingRequirements: z.array(z.string()).optional(),
 });
 
 const createTourSchema = z.object({
