@@ -37,7 +37,7 @@ app.use("/api/v1/programs", programRoutes);
 app.use("/api/v1/tours", tourRoutes);
 
 // APG routes
-app.use("/api/ipg", ipgRoutes);
+app.use("/api/v1/ipg", ipgRoutes);
 
 // Error handling
 app.use(notFoundHandler);
