@@ -79,7 +79,7 @@ const updateTourById = async (userId, params, input) => {
     const docRef = db.collection("tours").doc(tourId);
     const doc = await docRef.get();
 
-    if (!doc.exists || doc.data().userId !== userId) {
+    if (!doc.exists) {
       return null;
     }
 
@@ -105,7 +105,7 @@ const deleteTourById = async (userId, params) => {
     const docRef = db.collection("tours").doc(tourId);
     const doc = await docRef.get();
 
-    if (!doc.exists || doc.data().userId !== userId) {
+    if (!doc.exists) {
       return false;
     }
 
